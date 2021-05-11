@@ -75,6 +75,7 @@ private:
 
   mlx90393_res_t _resolution = MLX90395_RES_17;
   uint8_t _gain = 0;
+  uint8_t _gain_default = 0;
   float _uTLSB = 0;
   int32_t _sensorID = 90395;
 };
