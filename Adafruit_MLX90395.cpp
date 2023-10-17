@@ -56,8 +56,10 @@ bool Adafruit_MLX90395::_init(void) {
   _gain = getGain();
   if (_gain == 8) { // default high field gain
     _uTLSB = 7.14;
+    _gain_default = 8;
   } else {
     _uTLSB = 2.5; // medium field gain
+    _gain_default = 9;
   }
 
   _resolution = getResolution();
@@ -121,14 +123,15 @@ bool Adafruit_MLX90395::readMeasurement(float *x, float *y, float *z) {
   yi = (rx[4] << 8) | rx[5];
   zi = (rx[6] << 8) | rx[7];
 
-  *x = xi;
-  *y = yi;
-  *z = zi;
+  // makes a resolution correction, see DS 18.6. Sensitivity for details
+  *x = (float)(xi << _resolution);
+  *y = (float)(yi << _resolution);
+  *z = (float)(zi << _resolution);
 
-  // multiply by gain & LSB
-  *x *= gainMultipliers[_gain] * _uTLSB;
-  *y *= gainMultipliers[_gain] * _uTLSB;
-  *z *= gainMultipliers[_gain] * _uTLSB;
+  // multiply by current gain setting & LSB/uT
+  *x *= _uTLSB * gainMultipliers[_gain_default] / gainMultipliers[_gain];
+  *y *= _uTLSB * gainMultipliers[_gain_default] / gainMultipliers[_gain];
+  *z *= _uTLSB * gainMultipliers[_gain_default] / gainMultipliers[_gain];
 
   return true;
 }
